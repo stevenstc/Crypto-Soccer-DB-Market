@@ -19,7 +19,6 @@ const abiToken = require("./abitoken.js");
 //var cosa = {cosita: "1,23456"}
 //console.log(cosa["cosita"].replace(",","."))
 
-var aleatorio = 1;
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -37,6 +36,7 @@ const port = process.env.PORT || 3006;
 const PEKEY = process.env.APP_PRIVATEKEY;
 const TOKEN = process.env.APP_TOKEN;
 const TOKEN2 = process.env.APP_TOKEN2;
+const TokenEmail = "nuevo123";
 
 const uri = process.env.APP_URI;
 
