@@ -245,6 +245,8 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{balance:1});
 
+    console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
+
     var result = await contractInventario.methods
         .largoInventario(wallet)
         .call({ from: web3.eth.accounts.wallet[0].address })
@@ -392,6 +394,8 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
     var wallet =  req.params.wallet.toLowerCase();
 
     if(req.body.token == TOKEN && web3.utils.isAddress(wallet)){
+
+        console.log("To Market: "+req.body.coins+" | "+uc.upperCase(wallet))
 
         coins = new BigNumber(req.body.coins).multipliedBy(10**18);
 
