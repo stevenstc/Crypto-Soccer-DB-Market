@@ -287,9 +287,13 @@ async function monedasAlJuego(coins,wallet,intentos){
 
     var paso = true;
 
-    var gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
+    try {
+        var gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: "0x00326ad2E5ADb9b95035737fD4c56aE452C2c965"});
 
-    console.log("entro por aca")
+    } catch (err) {
+        console.log(err);
+    }
+
     if(balance - coins.shiftedBy(-18).toNumber() >= 0 ){
         await contractExchange.methods
             .gastarCoinsfrom(coins, wallet)
@@ -435,7 +439,13 @@ async function monedasAlMarket(coins,wallet,intentos){
 
     var gases = await web3.eth.getGasPrice(); 
 
-    var gasLimit = await contractExchange.methods.asignarCoinsTo(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
+    try{
+        var gasLimit = await contractExchange.methods.asignarCoinsTo(coins, wallet).estimateGas({from: "0x00326ad2E5ADb9b95035737fD4c56aE452C2c965"});
+    
+    } catch (err) {
+        console.log(err);
+        console.log("error al estimar el gas")
+    }
 
     var usuario = await user.find({ wallet: uc.upperCase(wallet) });
 
