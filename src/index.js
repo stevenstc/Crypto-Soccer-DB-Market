@@ -283,12 +283,11 @@ async function monedasAlJuego(coins,wallet,intentos){
 
     balance = new BigNumber(usuario.balance).shiftedBy(-18).decimalPlaces(0).toNumber();
 
-    var gases = await web3.eth.getGasPrice(); 
-
     var paso = true;
 
     try {
-        var gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: "0x00326ad2E5ADb9b95035737fD4c56aE452C2c965"});
+        var gases = await web3.eth.getGasPrice(); 
+        var gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
 
     } catch (err) {
         console.log(err);
@@ -438,10 +437,9 @@ async function monedasAlMarket(coins,wallet,intentos){
 
     var paso = false;
 
-    var gases = await web3.eth.getGasPrice(); 
-
     try{
-        var gasLimit = await contractExchange.methods.asignarCoinsTo(coins, wallet).estimateGas({from: "0x00326ad2E5ADb9b95035737fD4c56aE452C2c965"});
+        var gases = await web3.eth.getGasPrice(); 
+        var gasLimit = await contractExchange.methods.asignarCoinsTo(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
     
     } catch (err) {
         console.log(err);
@@ -490,30 +488,6 @@ async function monedasAlMarket(coins,wallet,intentos){
                     
                     }
             
-                }else{
-                    console.log("creado USUARIO monedas al Market"+wallet)
-                    var users = new user({
-                        wallet: uc.upperCase(wallet),
-                        email: "",
-                        password: "",
-                        username: "", 
-                        active: true,
-                        payAt: Date.now(),
-                        checkpoint: 0,
-                        reclamado: false,
-                        balance: 0,
-                        ingresado: 0,
-                        retirado: 0,
-                        deposit: [],
-                        retiro: [],
-                        txs: [explorador+result.transactionHash]
-                    });
-            
-                    users.save().then(()=>{
-                        console.log("Usuario creado exitodamente");
-                    })
-                        
-                
                 }
             })
 
