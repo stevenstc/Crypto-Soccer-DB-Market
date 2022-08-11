@@ -254,7 +254,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     result = parseInt(result);
 
-    if(result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) && usuario.balance > 0){
+    if(result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) && usuario.balance >= 0){
 
         await delay(Math.floor(Math.random() * 12000));
 
@@ -296,7 +296,7 @@ async function monedasAlJuego(coins,wallet,intentos){
         console.log("error al estimar el gas")
     }
 
-    if(balance >= 0 ){
+    if(balance - coins.shiftedBy(-18).decimalPlaces(0).toNumber() >= 0 ){
         await contractExchange.methods
             .gastarCoinsfrom(coins, wallet)
             .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
@@ -325,36 +325,6 @@ async function monedasAlJuego(coins,wallet,intentos){
                             
                         }
                 
-                    }else{
-                        console.log("creado USUARIO monedas al juego: "+wallet)
-                        var users = new user({
-                            wallet: uc.upperCase(wallet),    
-                            email: "",
-                            password: "",
-                            username: "", 
-                            active: true,
-                            payAt: Date.now(),
-                            checkpoint: 0,
-                            reclamado: false,
-                            balance: coins.shiftedBy(-18).decimalPlaces(0).toNumber(),
-                            ingresado: coins.shiftedBy(-18).decimalPlaces(0).toNumber(),
-                            retirado: 0,
-                            deposit: [{amount: coins.shiftedBy(-18).decimalPlaces(0).toNumber(),
-                                date: Date.now(),
-                                finalized: true,
-                                txhash: "FROM MARKET: "+coins.shiftedBy(-18).decimalPlaces(0).toString()+" # "+uc.upperCase(wallet)+" # Hash: "+explorador+result.transactionHash
-                            }],
-                            retiro: [],
-                            txs: [explorador+result.transactionHash]
-                        });
-                
-                        async() => {
-                            await users.save();
-                            console.log("Usuario creado exitodamente");
-                        };
-                        
-                            
-                        
                     }
                 })
 
