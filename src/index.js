@@ -292,6 +292,7 @@ async function monedasAlJuego(coins,wallet,intentos){
 
     } catch (err) {
         console.log(err);
+        console.log("error al estimar el gas")
     }
 
     if(balance - coins.shiftedBy(-18).toNumber() >= 0 ){
