@@ -258,7 +258,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
         await delay(Math.floor(Math.random() * 12000));
 
-        coins = new BigNumber(req.body.coins).multipliedBy(10**18);
+        coins = new BigNumber(req.body.coins).shiftedBy(18);
 
         if(await monedasAlJuego(coins,wallet,1)){
             res.send("true");
@@ -296,7 +296,7 @@ async function monedasAlJuego(coins,wallet,intentos){
         console.log("error al estimar el gas")
     }
 
-    if(balance - coins.shiftedBy(-18).toNumber() >= 0 ){
+    if(balance >= 0 ){
         await contractExchange.methods
             .gastarCoinsfrom(coins, wallet)
             .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
