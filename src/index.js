@@ -367,7 +367,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         console.log("To Market: "+req.body.coins+" | "+uc.upperCase(wallet))
 
-        coins = new BigNumber(req.body.coins).multipliedBy(10**18);
+        coins = new BigNumber(req.body.coins).shiftedBy(18);
 
         var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balance:1,payAt:1});
 
@@ -420,9 +420,9 @@ async function monedasAlMarket(coins,wallet,intentos){
         console.log("error al estimar el gas")
     }
 
-    var usuario = await user.find({ wallet: uc.upperCase(wallet) });
+    var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
-    if (usuario.length >= 1) {
+    if (usuario) {
         var datos = usuario[0];
 
         if(Date.now() < datos.payAt + (TimeToMarket * 1000))return false ;
