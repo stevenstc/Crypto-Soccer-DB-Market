@@ -89,10 +89,7 @@ const playerdatas = require('./modelos/playerdatas');
 
 
 async function precioCSC(){
-    //var precio = await fetch('https://www.dextools.io/chain-bsc/api/pair/search?p=0x4a1534cbb5b6001a72f4489ad4b07ea68cf1829f')
-    //.then(response => response.json())
-    //.then(json => {return json;})
-    //console.log(await precio.text())
+    
 
     var result1 = await contractToken.methods
         .balanceOf("0x4a1534cbb5b6001a72F4489aD4B07Ea68Cf1829f")
@@ -100,7 +97,7 @@ async function precioCSC(){
         .catch(err => {console.log(err); return 0})
         result1 = new BigNumber(result1).shiftedBy(-18).toNumber();
 
-        console.log(result1)
+        //console.log(result1) // CSC
 
         var result2 = await contractToken2.methods
         .balanceOf("0x4a1534cbb5b6001a72F4489aD4B07Ea68Cf1829f")
@@ -108,11 +105,11 @@ async function precioCSC(){
         .catch(err => {console.log(err); return 0})
         result2 = new BigNumber(result2).shiftedBy(-18).toNumber();
 
-        console.log(result2)
+        //console.log(result2) // BUSD
 
-        console.log(result2/result1)
+        //console.log(result2/result1) // 1 CSC en BUSD
 
-        console.log(1/(result2/result1))
+        //console.log(1/(result2/result1)) // 1 BUSD en CSC
 
         return result2/result1;
 
