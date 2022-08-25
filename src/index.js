@@ -311,16 +311,10 @@ async function monedasAlJuego(coins,wallet,intentos){
                         delete datos._id;
                         if(datos.active){
                             datos.balance = coins.shiftedBy(-18).plus(datos.balance).decimalPlaces(0).toNumber();
-                            datos.ingresado = coins.shiftedBy(-18).plus(datos.ingresado).decimalPlaces(0).toNumber();
-                            datos.deposit.push({
-                                amount: coins.shiftedBy(-18).decimalPlaces(0).toNumber(),
-                                date: Date.now(),
-                                finalized: true,
-                                txhash: "FROM MARKET: "+coins.shiftedBy(-18).decimalPlaces(0).toString()+" # wallet: "+uc.upperCase(wallet)+" # Hash: "+explorador+result.transactionHash
-                            })
+                            
                             datos.txs.push(explorador+result.transactionHash)
                             update = user.updateOne({ wallet: uc.upperCase(wallet) }, {$set: datos})
-                            .then(console.log("Coins SEND TO GAME: "+coins.shiftedBy(-18)+" # "+wallet))
+                            .then(console.log("SEND TO GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)))
                             .catch(console.error())
                             
                         }
@@ -333,7 +327,7 @@ async function monedasAlJuego(coins,wallet,intentos){
 
             .catch(async() => {
                 intentos++;
-                console.log(coins.shiftedBy(-18)+" ->  "+wallet+" : "+intentos)
+                console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
                 await delay(Math.floor(Math.random() * 12000));
                 paso = await monedasAlJuego(coins,wallet,intentos);
             })
@@ -423,9 +417,8 @@ async function monedasAlMarket(coins,wallet,intentos){
     var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
     if (usuario) {
-        var datos = usuario[0];
 
-        if(Date.now() < datos.payAt + (TimeToMarket * 1000))return false ;
+        if(Date.now() < usuario.payAt + (TimeToMarket * 1000))return false ;
     }else{
         return false;
     }
@@ -434,8 +427,6 @@ async function monedasAlMarket(coins,wallet,intentos){
         .asignarCoinsTo(coins, wallet)
         .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
         .then(result => {
-
-            console.log("Monedas ENVIADAS en "+intentos+" intentos");
             
             user.find({ wallet: uc.upperCase(wallet) }).then(usuario =>{
 
@@ -445,20 +436,13 @@ async function monedasAlMarket(coins,wallet,intentos){
                     if(datos.active ){
                         datos.payAt = Date.now();
                         datos.balance = datos.balance-coins.shiftedBy(-18).toNumber();
-                        datos.retirado = coins.shiftedBy(-18).toNumber()+datos.retirado;
-                        datos.retiro.push({
-                            amount: coins.shiftedBy(-18).toNumber(),
-                            date: Date.now(),
-                            finalized: true,
-                            txhash: "TO MARKET: "+coins.shiftedBy(-18).decimalPlaces(0).toString()+" # wallet: "+uc.upperCase(wallet)+" # Hash: "+explorador+result.transactionHash
-                        })
+                       
                         datos.txs.push(explorador+result.transactionHash)
                         
                         user.updateOne({ wallet: uc.upperCase(wallet) }, [
                             {$set:datos}
                         ])
-                        .then(console.log("Coins SEND TO MARKET: "+coins.shiftedBy(-18)+" # "+wallet))
-                        .catch(console.error())
+                        .then(console.log("SEND TO MARKET: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)))
                     
                     }
             
@@ -471,7 +455,7 @@ async function monedasAlMarket(coins,wallet,intentos){
         .catch(async err => {
             console.log(err);
             intentos++;
-            console.log(coins.shiftedBy(-18)+" ->  "+wallet+" : "+intentos)
+            console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
             await delay(Math.floor(Math.random() * 12000));
             paso = await monedasAlMarket(coins,wallet,intentos);
         })
