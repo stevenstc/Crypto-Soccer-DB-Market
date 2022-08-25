@@ -55,7 +55,9 @@ let web3 = new Web3(RED);
 
 const contractExchange = new web3.eth.Contract(abiExchage,addressExchnge);
 const contractInventario = new web3.eth.Contract(abiInventario,addressInventario);
-const contractToken = new web3.eth.Contract(abiToken,addressContractToken);
+const contractToken = new web3.eth.Contract(abiToken,addressContractToken); // CSC
+const contractToken2 = new web3.eth.Contract(abiToken,"0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"); // BUSD
+
 
 web3.eth.accounts.wallet.add(PEKEY);
 
@@ -84,6 +86,41 @@ const appdatos = require("./modelos/appdatos");
 const playerData = require("./modelos/playerdatas");
 const userplayonline = require("./modelos/userplayonline");
 const playerdatas = require('./modelos/playerdatas');
+
+
+async function precioCSC(){
+    //var precio = await fetch('https://www.dextools.io/chain-bsc/api/pair/search?p=0x4a1534cbb5b6001a72f4489ad4b07ea68cf1829f')
+    //.then(response => response.json())
+    //.then(json => {return json;})
+    //console.log(await precio.text())
+
+    var result1 = await contractToken.methods
+        .balanceOf("0x4a1534cbb5b6001a72F4489aD4B07Ea68Cf1829f")
+        .call({ from: web3.eth.accounts.wallet[0].address })
+        .catch(err => {console.log(err); return 0})
+        result1 = new BigNumber(result1).shiftedBy(-18).toNumber();
+
+        console.log(result1)
+
+        var result2 = await contractToken2.methods
+        .balanceOf("0x4a1534cbb5b6001a72F4489aD4B07Ea68Cf1829f")
+        .call({ from: web3.eth.accounts.wallet[0].address })
+        .catch(err => {console.log(err); return 0})
+        result2 = new BigNumber(result2).shiftedBy(-18).toNumber();
+
+        console.log(result2)
+
+        console.log(result2/result1)
+
+        console.log(1/(result2/result1))
+
+        return result2/result1;
+
+}
+
+app.get('/api/v1/priceCSC',async(req,res) => {
+    res.send(await precioCSC()+"");
+});
 
 app.get('/', require("./v1/funcionando"));
 
