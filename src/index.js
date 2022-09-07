@@ -281,10 +281,8 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
 
-    var result = await contractInventario.methods
-        .largoInventario(wallet)
-        .call({ from: web3.eth.accounts.wallet[0].address })
-        .catch(err => {console.log(err); return 0})
+    var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
+    .catch(err => {console.log(err); return 0})
 
     result = parseInt(result);
 
@@ -313,58 +311,59 @@ async function monedasAlJuego(coins,wallet,intentos){
 
     await delay(Math.floor(Math.random() * 12000));
 
-    var usuario = await contractExchange.methods
-    .investors(wallet)
-    .call({ from: web3.eth.accounts.wallet[0].address});
+    var paso = false;
 
-    balance = new BigNumber(usuario.balance).shiftedBy(-18).decimalPlaces(0).toNumber();
+    var usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
 
-    var paso = true;
+    usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
 
-    try {
-        var gases = await web3.eth.getGasPrice(); 
-        var gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
+    if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
+        var gases = 0; 
+        var gasLimit = 0;
 
-    } catch (err) {
-        console.log(err);
-        console.log("error al estimar el gas")
-    }
+        try {
+            gases = await web3.eth.getGasPrice(); 
+            gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
 
-    if(balance - coins.shiftedBy(-18).decimalPlaces(0).toNumber() >= 0 ){
-        await contractExchange.methods
-            .gastarCoinsfrom(coins, wallet)
-            .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
-            .then(result => {
-                console.log("Monedas ENVIADAS en "+intentos+" intentos");
-                //console.log(explorador+result.transactionHash);
+        } catch (err) {
+            console.log("error al estimar el gas")
+            gases = 0; 
+            gasLimit = 0;
+        }   
+
+        var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
+        .then(() => {return true;})
+        .catch(() => {return false;})
+
+        if(exitoso){
+            var myUser = await user.findOne({ wallet: uc.upperCase(wallet) });
+            
+            if(myUser && myUser.active){
+                    
+                await user.updateOne({ wallet: uc.upperCase(wallet) }, [
+                    {$set: {$sum:["$balance",coins.shiftedBy(-18).toNumber()]}}
+                ])
                 
-                user.find({ wallet: uc.upperCase(wallet) }).then(usuario =>{
-
-                    if (usuario.length >= 1) {
-                        var datos = usuario[0];
-                        delete datos._id;
-                        if(datos.active){
-                            datos.balance = coins.shiftedBy(-18).plus(datos.balance).decimalPlaces(0).toNumber();
-                            
-                            datos.txs.push(explorador+result.transactionHash)
-                            update = user.updateOne({ wallet: uc.upperCase(wallet) }, {$set: datos})
-                            .then(console.log("SEND TO GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)))
-                            .catch(console.error())
-                            
-                        }
+                console.log("SEND TO GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)+" | "+intentos+" intentos")
                 
-                    }
-                })
+            }
 
-                paso = true;
-            })
-
-            .catch(async() => {
-                intentos++;
-                console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
+        }else{
+            
+            intentos++;
+        
+            if(intentos > 3 ){
+                console.log("envio de "+coins.shiftedBy(-18)+" a Game CANCELADO"+uc.upperCase(wallet)+" : "+intentos)
+                paso = false;
+            }else{
                 await delay(Math.floor(Math.random() * 12000));
+                console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
                 paso = await monedasAlJuego(coins,wallet,intentos);
-            })
+
+            }
+            
+        }
+            
     }else{
         paso = false;
     }
@@ -399,27 +398,31 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balance:1,payAt:1});
 
-        var result = await contractInventario.methods
-        .largoInventario(wallet)
-        .call({ from: web3.eth.accounts.wallet[0].address })
+        var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
         .catch(err => {console.log(err); return 0})
+
         result = parseInt(result);
 
-        if (result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balance > 0 && usuario.balance-parseInt(req.body.coins) >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
-            
-            //await user.updateOne({ wallet: uc.upperCase(wallet) }, [
-            //    {$set:{balance:usuario.balance-parseInt(req.body.coins)}}
-            //])
+        if (usuario && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balance > 0 && usuario.balance-coins.shiftedBy(-18).toNumber() >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
+
+            var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{balance:1});
 
             await delay(Math.floor(Math.random() * 12000));
 
-            if(await monedasAlMarket(coins, wallet,1)){
-                res.send("true");
+            if(usuario.balance >= 0){
+
+                if(await monedasAlMarket(coins, wallet,1) ){
+                    res.send("true");
+    
+                }else{
+                    res.send("false");
+    
+                }
 
             }else{
                 res.send("false");
-
             }
+            
         }else{
 
             res.send("false");
@@ -439,60 +442,60 @@ async function monedasAlMarket(coins,wallet,intentos){
 
     var paso = false;
 
-    try{
-        var gases = await web3.eth.getGasPrice(); 
-        var gasLimit = await contractExchange.methods.asignarCoinsTo(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
-    
-    } catch (err) {
-        console.log(err);
-        console.log("error al estimar el gas")
-    }
-
     var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
-    if (usuario) {
+    if (usuario && usuario.active) {
 
         if(Date.now() < usuario.payAt + (TimeToMarket * 1000))return false ;
     }else{
         return false;
     }
 
-    await contractExchange.methods
-        .asignarCoinsTo(coins, wallet)
-        .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
-        .then(result => {
-            
-            user.find({ wallet: uc.upperCase(wallet) }).then(usuario =>{
+    var gases = 0; 
+    var gasLimit = 0;
 
-                if (usuario.length >= 1) {
-                    var datos = usuario[0];
-                    delete datos._id;
-                    if(datos.active ){
-                        datos.payAt = Date.now();
-                        datos.balance = datos.balance-coins.shiftedBy(-18).toNumber();
-                       
-                        datos.txs.push(explorador+result.transactionHash)
-                        
-                        user.updateOne({ wallet: uc.upperCase(wallet) }, [
-                            {$set:datos}
-                        ])
-                        .then(console.log("SEND TO MARKET: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)))
+    try{
+        gases = await web3.eth.getGasPrice(); 
+        gasLimit = await contractExchange.methods.asignarCoinsTo(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
+    
+    } catch (err) {
+        
+        console.log("error al estimar el gas")
+        gases = 0; 
+        gasLimit = 0;
+    }
+
+    var envioExitoso = await contractExchange.methods
+    .asignarCoinsTo(coins, wallet)
+    .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
+    .then(() => {return true;})
+    .catch(() => {return false;})
+
+    if(envioExitoso ){
+
+        await user.updateOne({ wallet: uc.upperCase(wallet) },[
+            {$set: {balance:{$sum: ["$balance",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
+        ])
+        
+        console.log("SEND TO MARKET: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet))
                     
-                    }
-            
-                }
-            })
+        paso = true;
 
-            paso = true;
-        })
-
-        .catch(async err => {
-            console.log(err);
-            intentos++;
+    }else{
+        intentos++;
+        
+        if(intentos > 3 ){
+            console.log("envio de "+coins.shiftedBy(-18)+" a Market CANCELADO"+uc.upperCase(wallet)+" : "+intentos)
+            paso = false;
+        }else{
             console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
             await delay(Math.floor(Math.random() * 12000));
             paso = await monedasAlMarket(coins,wallet,intentos);
-        })
+
+        }
+        
+    }
+    
 
     return paso;
 
