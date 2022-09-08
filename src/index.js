@@ -344,7 +344,7 @@ async function monedasAlJuego(coins,wallet,intentos){
                     {$set: {$sum:["$balance",coins.shiftedBy(-18).toNumber()]}}
                 ])
                 
-                console.log("SEND TO GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)+" | "+intentos+" intentos")
+                console.log("SEND IN GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)+" | "+intentos+" intentos")
                 
             }
 
