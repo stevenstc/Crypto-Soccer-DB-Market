@@ -474,10 +474,10 @@ async function monedasAlMarket(coins,wallet,intentos){
     if(envioExitoso ){
 
         await user.updateOne({ wallet: uc.upperCase(wallet) },[
-            {$set: {balance:{$sum: ["$balance",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
+            {$set: {balance:{$subtract: ["$balance",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
         ])
         
-        console.log("SEND TO MARKET: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet))
+        console.log("SEND TO Exchange: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet))
                     
         paso = true;
 
