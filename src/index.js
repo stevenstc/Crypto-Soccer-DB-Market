@@ -341,7 +341,7 @@ async function monedasAlJuego(coins,wallet,intentos){
             if(myUser && myUser.active){
                     
                 await user.updateOne({ wallet: uc.upperCase(wallet) }, [
-                    {$set: {$sum:["$balance",coins.shiftedBy(-18).toNumber()]}}
+                    {$set: {balance: {$sum:["$balance",coins.shiftedBy(-18).toNumber()]}}}
                 ])
                 
                 console.log("SEND IN GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)+" | "+intentos+" intentos")
