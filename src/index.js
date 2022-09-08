@@ -346,6 +346,7 @@ async function monedasAlJuego(coins,wallet,intentos){
                 
                 console.log("SEND IN GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)+" | "+intentos+" intentos")
                 
+                paso = true;
             }
 
         }else{
