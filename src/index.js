@@ -312,24 +312,24 @@ async function monedasAlJuego(coins,wallet,intentos){
     await delay(Math.floor(Math.random() * 12000));
 
     var paso = false;
+    var gases = 0; 
+    var gasLimit = 0;
+
+    try {
+        gases = await web3.eth.getGasPrice(); 
+        gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
+
+    } catch (err) {
+        console.log("error al estimar el gas")
+        gases = 0; 
+        gasLimit = 0;
+    }   
 
     var usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
 
     usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
-
+    
     if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
-        var gases = 0; 
-        var gasLimit = 0;
-
-        try {
-            gases = await web3.eth.getGasPrice(); 
-            gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
-
-        } catch (err) {
-            console.log("error al estimar el gas")
-            gases = 0; 
-            gasLimit = 0;
-        }   
 
         var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
         .then(() => {return true;})
@@ -397,12 +397,13 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         coins = new BigNumber(req.body.coins).shiftedBy(18);
 
-        var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balance:1,payAt:1});
 
         var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
         .catch(err => {console.log(err); return 0})
 
         result = parseInt(result);
+
+        var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balance:1,payAt:1});
 
         if (usuario && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balance > 0 && usuario.balance-coins.shiftedBy(-18).toNumber() >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
 
@@ -412,7 +413,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
             if(usuario.balance >= 0){
 
-                if(await monedasAlMarket(coins, wallet,1) ){
+                if(await monedasAlExchange(coins, wallet,1) ){
                     res.send("true");
     
                 }else{
@@ -437,7 +438,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 		
 });
 
-async function monedasAlMarket(coins,wallet,intentos){
+async function monedasAlExchange(coins,wallet,intentos){
 
     await delay(Math.floor(Math.random() * 12000));
 
@@ -457,7 +458,7 @@ async function monedasAlMarket(coins,wallet,intentos){
 
     try{
         gases = await web3.eth.getGasPrice(); 
-        gasLimit = await contractExchange.methods.asignarCoinsTo(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
+        gasLimit = await contractExchange.methods.asignarCoinsTo(coins.toString(10), wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
     
     } catch (err) {
         
@@ -466,35 +467,39 @@ async function monedasAlMarket(coins,wallet,intentos){
         gasLimit = 0;
     }
 
-    var envioExitoso = await contractExchange.methods
-    .asignarCoinsTo(coins, wallet)
-    .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
-    .then(() => {return true;})
-    .catch(() => {return false;})
+    usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
-    if(envioExitoso ){
+    if(usuario.balance-coins.shiftedBy(-18).toNumber() >= 0 ){
+        var envioExitoso = await contractExchange.methods
+        .asignarCoinsTo(coins.toString(10), wallet)
+        .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
+        .then(() => {return true;})
+        .catch(() => {return false;})
 
-        await user.updateOne({ wallet: uc.upperCase(wallet) },[
-            {$set: {balance:{$subtract: ["$balance",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
-        ])
-        
-        console.log("SEND TO Exchange: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet))
-                    
-        paso = true;
+        if(envioExitoso ){
 
-    }else{
-        intentos++;
-        
-        if(intentos > 3 ){
-            console.log("envio de "+coins.shiftedBy(-18)+" a Market CANCELADO"+uc.upperCase(wallet)+" : "+intentos)
-            paso = false;
+            await user.updateOne({ wallet: uc.upperCase(wallet) },[
+                {$set: {balance:{$subtract: ["$balance",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
+            ])
+            
+            console.log("SEND TO Exchange: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet))
+                        
+            paso = true;
+
         }else{
-            console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
-            await delay(Math.floor(Math.random() * 12000));
-            paso = await monedasAlMarket(coins,wallet,intentos);
+            intentos++;
+            
+            if(intentos > 3 ){
+                console.log("envio de "+coins.shiftedBy(-18)+" a Market CANCELADO"+uc.upperCase(wallet)+" : "+intentos)
+                paso = false;
+            }else{
+                console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
+                await delay(Math.floor(Math.random() * 12000));
+                paso = await monedasAlExchange(coins,wallet,intentos);
 
+            }
+            
         }
-        
     }
     
 
