@@ -286,7 +286,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     result = parseInt(result);
 
-    if(result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) && usuario.balance >= 0){
+    if(usuario && usuario.active && result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) ){
 
         await delay(Math.floor(Math.random() * 12000));
 
@@ -405,13 +405,13 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balance:1,payAt:1});
 
-        if (usuario && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balance > 0 && usuario.balance-coins.shiftedBy(-18).toNumber() >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
+        if (usuario && usuario.active && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balance > 0 && usuario.balance-coins.shiftedBy(-18).toNumber() >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
 
             var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{balance:1});
 
             await delay(Math.floor(Math.random() * 12000));
 
-            if(usuario.balance >= 0){
+            if(usuario.balance > 0){
 
                 if(await monedasAlExchange(coins, wallet,1) ){
                     res.send("true");
