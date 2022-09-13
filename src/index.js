@@ -51,7 +51,7 @@ const imgDefault = "0";
 
 let web3 = new Web3(new Web3.providers.HttpProvider(RED));
 
-console.log(web3)
+//console.log(web3)
 
 const contractExchange = new web3.eth.Contract(abiExchage,addressExchnge);
 const contractInventario = new web3.eth.Contract(abiInventario,addressInventario);
