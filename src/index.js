@@ -277,7 +277,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     var wallet =  req.params.wallet.toLowerCase();
 
-    var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{balance:1});
+    var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
     console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
 
