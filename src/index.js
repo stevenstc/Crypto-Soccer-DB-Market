@@ -315,19 +315,21 @@ async function monedasAlJuego(coins,wallet,intentos){
     var gases = 0; 
     var gasLimit = 0;
 
+    var usuario = {};
+
+    usuario.balance = 0;
+
     try {
         gases = await web3.eth.getGasPrice(); 
         gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
-
+        usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
+        usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
     } catch (err) {
         console.log("error al estimar el gas")
         gases = 0; 
         gasLimit = 0;
     }   
 
-    var usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
-
-    usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
     
     if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
 
@@ -372,6 +374,11 @@ async function monedasAlJuego(coins,wallet,intentos){
     return paso;
 
 }
+
+app.get('/api/v1/coinsdiaria/',async(req,res)=>{
+
+    res.send((await appdatos.findOne({})).diponibleDiaria.toString(10))
+})
 
 app.get('/api/v1/time/coinsalmarket/:wallet',async(req,res)=>{
     var wallet =  req.params.wallet.toLowerCase();
