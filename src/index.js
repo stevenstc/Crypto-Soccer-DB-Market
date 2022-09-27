@@ -53,7 +53,10 @@ let web3 = new Web3(new Web3.providers.HttpProvider(RED));
 
 //console.log(web3)
 
-const contractExchange = new web3.eth.Contract(abiExchage,addressExchnge);
+const contractExchange = new web3.eth.Contract(abiExchage,addressExchnge, {
+    from: '0x00326ad2E5ADb9b95035737fD4c56aE452C2c965', // default from address
+    gasPrice: '20000000000' // default gas price in wei, 20 gwei in this case
+});
 const contractInventario = new web3.eth.Contract(abiInventario,addressInventario);
 const contractToken = new web3.eth.Contract(abiToken,addressContractToken); // DCSC
 const contractToken2 = new web3.eth.Contract(abiToken,"0x55d398326f99059fF775485246999027B3197955"); // USDT
@@ -325,25 +328,19 @@ async function monedasAlJuego(gasLimit,coins,wallet,intentos){
         console.log("error al estimar el gasprice")
     }   
 
-    console.log(gasLimit)
+
+    /*try {
+        gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address})
     
-    var calcgasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address})
-    .catch(()=>{return 0;})
-
-    console.log(calcgasLimit)
-
-    if(calcgasLimit != 0){
-        gasLimit = calcgasLimit;
-
-    }else{
+    }catch(err){
         console.log("error al estimar el gaslimit 2")
 
-    }  
+    }  */
 
     
     if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
 
-        var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
+        var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address,  gasPrice: gases })
         .then(() => {return true;})
         .catch(() => {return false;})
 
