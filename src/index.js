@@ -326,6 +326,8 @@ async function monedasAlJuego(coins,wallet,intentos){
         console.log("error al estimar el gasprice")
     }   
 
+    console.log(gases)
+
 
     try {
         gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address})
@@ -338,7 +340,7 @@ async function monedasAlJuego(coins,wallet,intentos){
     
     if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
 
-        var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit,  gasPrice: gases })
+        var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address, gas: 40000,  gasPrice: gases })
         .then(() => {return true;})
         .catch(() => {return false;})
 
