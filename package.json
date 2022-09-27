@@ -24,7 +24,7 @@
     "node-fetch": "^2.6.1",
     "request": "^2.88.2",
     "upper-case": "^2.0.2",
-    "web3": "^1.7.5"
+    "web3": "^1.8.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
