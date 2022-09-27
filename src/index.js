@@ -340,7 +340,7 @@ async function monedasAlJuego(gasLimit,coins,wallet,intentos){
     
     if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
 
-        var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address,  gasPrice: gases })
+        var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address, gas: '40000',  gasPrice: gases })
         .then(() => {return true;})
         .catch(() => {return false;})
 
