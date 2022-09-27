@@ -426,8 +426,6 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         result = parseInt(result);
 
-        console.log("pass");
-
         var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balanceUSD:1,payAt:1});
 
         if (usuario && usuario.active && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balanceUSD > 0 && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ) {
@@ -436,21 +434,26 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
             //await delay(Math.floor(Math.random() * 12000));
 
+            console.log("pass");
+
             if(await monedasAlExchange(coins, wallet,1) ){
                 res.send("true");
 
             }else{
+                console.log("pass2");
                 res.send("false");
 
             }
             
         }else{
+            console.log("pass3");
 
             res.send("false");
 
         }
 
     }else{
+
 
         res.send("false");
     }
