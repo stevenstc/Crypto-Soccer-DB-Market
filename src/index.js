@@ -328,7 +328,7 @@ async function monedasAlJuego(coins,wallet,intentos,precio){
     var gases = 0; 
     var gasLimit = 0;
 
-    usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
+    var usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
     usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
 
     try {
@@ -347,7 +347,6 @@ async function monedasAlJuego(coins,wallet,intentos,precio){
 
     } 
 
-    
     if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
 
         var exitoso = await contractExchange.methods.gastarCoinsfrom(coins, wallet).send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit,  gasPrice: gases })
@@ -385,6 +384,7 @@ async function monedasAlJuego(coins,wallet,intentos,precio){
         }
             
     }else{
+        console.log("no balance")
         paso = false;
     }
 
