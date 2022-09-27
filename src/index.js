@@ -316,15 +316,13 @@ async function monedasAlJuego(coins,wallet,intentos){
     var gases = 0; 
     var gasLimit = 0;
 
-    var usuario = {};
-
-    usuario.balance = 0;
+    usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
+    usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
 
     try {
         gases = await web3.eth.getGasPrice(); 
         gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
-        usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
-        usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
+        
     } catch (err) {
         console.log("error al estimar el gas")
         gases = 0; 
