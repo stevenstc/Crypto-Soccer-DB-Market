@@ -55,7 +55,7 @@ let web3 = new Web3(new Web3.providers.HttpProvider(RED));
 
 const contractExchange = new web3.eth.Contract(abiExchage,addressExchnge, {
     from: '0x00326ad2E5ADb9b95035737fD4c56aE452C2c965', // default from address
-    gasPrice: '20000000000' // default gas price in wei, 20 gwei in this case
+    gasPrice: '40000' // default gas price in wei, 20 gwei in this case
 });
 const contractInventario = new web3.eth.Contract(abiInventario,addressInventario);
 const contractToken = new web3.eth.Contract(abiToken,addressContractToken); // DCSC
