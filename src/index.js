@@ -44,8 +44,8 @@ const TimeToMarket = process.env.APP_TIMEMARKET || 86400 * 7;
 
 const RED = process.env.APP_RED || "https://bsc-dataseed.binance.org/";
 const addressInventario = process.env.APP_CONTRACT_INVENTARIO || "0x16Da4914542574F953b31688f20f1544d4E89537";
-const addressExchnge = process.env.APP_CONTRACT_EXCHANGE || "0x42D3ad6032311220C48ccee4cE5401308F7AC88A";
-const addressContractToken = process.env.APP_CONTRACTTOKEN || "0xF0fB4a5ACf1B1126A991ee189408b112028D7A63";
+const addressExchnge = process.env.APP_CONTRACT_EXCHANGE || "0x7eeAA02dAc001bc589703B6330067fdDAeAcAc87";
+const addressContractToken = process.env.APP_CONTRACTTOKEN || "0x7Ca78Da43388374E0BA3C46510eAd7473a1101d4";//DCSC
 
 const imgDefault = "0";
 
@@ -55,8 +55,8 @@ let web3 = new Web3(new Web3.providers.HttpProvider(RED));
 
 const contractExchange = new web3.eth.Contract(abiExchage,addressExchnge);
 const contractInventario = new web3.eth.Contract(abiInventario,addressInventario);
-const contractToken = new web3.eth.Contract(abiToken,addressContractToken); // CSC
-const contractToken2 = new web3.eth.Contract(abiToken,"0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"); // BUSD
+const contractToken = new web3.eth.Contract(abiToken,addressContractToken); // DCSC
+const contractToken2 = new web3.eth.Contract(abiToken,"0x55d398326f99059fF775485246999027B3197955"); // USDT
 
 
 web3.eth.accounts.wallet.add(PEKEY);
@@ -92,7 +92,7 @@ async function precioCSC(){
     
 
     var result1 = await contractToken.methods
-        .balanceOf("0x4a1534cbb5b6001a72F4489aD4B07Ea68Cf1829f")
+        .balanceOf("0x7Ca78Da43388374E0BA3C46510eAd7473a1101d4")
         .call({ from: web3.eth.accounts.wallet[0].address })
         .catch(err => {console.log(err); return 0})
         result1 = new BigNumber(result1).shiftedBy(-18).toNumber();
@@ -100,7 +100,7 @@ async function precioCSC(){
         //console.log(result1) // CSC
 
         var result2 = await contractToken2.methods
-        .balanceOf("0x4a1534cbb5b6001a72F4489aD4B07Ea68Cf1829f")
+        .balanceOf("0x7Ca78Da43388374E0BA3C46510eAd7473a1101d4")
         .call({ from: web3.eth.accounts.wallet[0].address })
         .catch(err => {console.log(err); return 0})
         result2 = new BigNumber(result2).shiftedBy(-18).toNumber();
