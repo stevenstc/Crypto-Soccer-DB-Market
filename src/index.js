@@ -426,7 +426,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         result = parseInt(result);
 
-        var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balanceUSD:1,payAt:1});
+        var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balanceUSD:1,active:1});
 
         if (usuario && usuario.active && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balanceUSD > 0 && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ) {
 
