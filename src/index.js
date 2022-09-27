@@ -290,13 +290,13 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     result = parseInt(result);
 
-    if(usuario && usuario.active && req.body.coins*req.body.precio > 0 && req.body.gasLimit*1 > 0 && result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) ){
+    if(usuario && usuario.active && req.body.coins*req.body.precio > 0 && result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) ){
 
         await delay(Math.floor(Math.random() * 12000));
 
         coins = new BigNumber(req.body.coins*req.body.precio).shiftedBy(18);
 
-        if(await monedasAlJuego(req.body.gasLimit*1,coins,wallet,1)){
+        if(await monedasAlJuego(coins,wallet,1)){
             res.send("true");
 
         }else{
@@ -311,7 +311,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
     
 });
 
-async function monedasAlJuego(gasLimit,coins,wallet,intentos){
+async function monedasAlJuego(coins,wallet,intentos){
 
     await delay(Math.floor(Math.random() * 12000));
 
