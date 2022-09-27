@@ -494,7 +494,7 @@ async function monedasAlExchange(coins,wallet,intentos,precio){
                 {$set: {balanceUSD:{$subtract: ["$balanceUSD",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
             ])
             
-            console.log("SEND TO Exchange: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet))
+            console.log("SEND TO Exchange: "+envioExchange.shiftedBy(-18)+" DCSC # "+uc.upperCase(wallet))
                         
             paso = true;
 
