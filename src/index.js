@@ -467,16 +467,6 @@ async function monedasAlExchange(coins,wallet,intentos){
     await delay(Math.floor(Math.random() * 12000));
 
     var paso = false;
-
-    var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
-
-    if (usuario && usuario.active) {
-
-        if(Date.now() < usuario.payAt + (TimeToMarket * 1000))return false ;
-    }else{
-        return false;
-    }
-
     var gases = 0; 
     var gasLimit = 0;
 
@@ -486,16 +476,13 @@ async function monedasAlExchange(coins,wallet,intentos){
     
     } catch (err) {
         
-        console.log("error al estimar el gas")
-        gases = 0; 
-        gasLimit = 0;
+        console.log("error al estimar el gas");
     }
 
     usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
-    if(usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ){
-        var envioExitoso = await contractExchange.methods
-        .asignarCoinsTo(coins.toString(10), wallet)
+    if(usuario && usuario.active && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ){
+        var envioExitoso = await contractExchange.methods.asignarCoinsTo(coins.toString(10), wallet)
         .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
         .then(() => {return true;})
         .catch(() => {return false;})
