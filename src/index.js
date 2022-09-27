@@ -417,9 +417,11 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
     if(req.body.token == TOKEN && web3.utils.isAddress(wallet)){
 
-        console.log("To Market: "+req.body.coins+" | "+uc.upperCase(wallet))
+        console.log("To Exchange: "+req.body.coins+" | "+uc.upperCase(wallet))
 
-        coins = new BigNumber(req.body.coins).shiftedBy(18);
+        var coins = new BigNumber(req.body.coins).shiftedBy(18);
+        var precio = new BigNumber(req.body.precio).toNumber();
+        
 
         var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
         .catch(err => {console.log(err); return 0})
@@ -436,7 +438,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
             console.log("pass");
 
-            if(await monedasAlExchange(coins, wallet,1) ){
+            if(await monedasAlExchange(coins, wallet,1,precio) ){
                 res.send("true");
 
             }else{
@@ -460,7 +462,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 		
 });
 
-async function monedasAlExchange(coins,wallet,intentos){
+async function monedasAlExchange(coins,wallet,intentos,precio){
 
     await delay(Math.floor(Math.random() * 12000));
 
@@ -480,7 +482,8 @@ async function monedasAlExchange(coins,wallet,intentos){
     usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
     if(usuario && usuario.active && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ){
-        var envioExitoso = await contractExchange.methods.asignarCoinsTo(coins.toString(10), wallet)
+        var envioExchange = coins.shiftedBy(-18).dividedBy(precio).shiftedBy(18)
+        var envioExitoso = await contractExchange.methods.asignarCoinsTo(envioExchange.toString(10), wallet)
         .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
         .then(() => {return true;})
         .catch(() => {return false;})
@@ -504,7 +507,7 @@ async function monedasAlExchange(coins,wallet,intentos){
             }else{
                 console.log(coins.shiftedBy(-18)+" ->  "+uc.upperCase(wallet)+" : "+intentos)
                 await delay(Math.floor(Math.random() * 12000));
-                paso = await monedasAlExchange(coins,wallet,intentos);
+                paso = await monedasAlExchange(coins,wallet,intentos,precio);
 
             }
             
