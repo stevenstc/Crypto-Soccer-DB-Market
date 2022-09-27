@@ -325,14 +325,20 @@ async function monedasAlJuego(gasLimit,coins,wallet,intentos){
         console.log("error al estimar el gasprice")
     }   
 
+    console.log(gasLimit)
     
-    /*try {
-        gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: "0x00326ad2E5ADb9b95035737fD4c56aE452C2c965"});
-        
-    } catch (err) {
+    var calcgasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address})
+    .catch(()=>{return 0;})
+
+    console.log(calcgasLimit)
+
+    if(calcgasLimit != 0){
+        gasLimit = calcgasLimit;
+
+    }else{
         console.log("error al estimar el gaslimit 2")
 
-    }   */
+    }  
 
     
     if(usuario.balance - coins.shiftedBy(-18).toNumber() >= 0){
