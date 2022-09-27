@@ -421,7 +421,6 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         coins = new BigNumber(req.body.coins).shiftedBy(18);
 
-
         var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
         .catch(err => {console.log(err); return 0})
 
@@ -429,11 +428,11 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balanceUSD:1,payAt:1});
 
-        if (usuario && usuario.active && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balanceUSD > 0 && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
+        if (usuario && usuario.active && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balanceUSD > 0 && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ) {
 
             var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{balanceUSD:1});
 
-            await delay(Math.floor(Math.random() * 12000));
+            //await delay(Math.floor(Math.random() * 12000));
 
             if(usuario.balanceUSD > 0){
 
