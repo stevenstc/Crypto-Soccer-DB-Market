@@ -321,12 +321,17 @@ async function monedasAlJuego(coins,wallet,intentos){
 
     try {
         gases = await web3.eth.getGasPrice(); 
+ 
+    } catch (err) {
+        console.log("error al estimar el gas 1")
+    }   
+
+    try {
         gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
         
     } catch (err) {
-        console.log("error al estimar el gas")
-        gases = 0; 
-        gasLimit = 0;
+        console.log("error al estimar el gaslimit 2")
+
     }   
 
     
