@@ -234,7 +234,7 @@ app.get('/api/v1/coins/:wallet',async(req,res) => {
 
         if (usuario.length >= 1) {
             usuario = usuario[0];
-            res.send(usuario.balance+"");
+            res.send(usuario.balanceUSD+"");
 
         }else{
             console.log("creado USUARIO al consultar monedas: "+wallet)
@@ -248,6 +248,7 @@ app.get('/api/v1/coins/:wallet',async(req,res) => {
                 checkpoint: 0,
                 reclamado: false,
                 balance: 0,
+                balanceUSD: 0,
                 ingresado: 0,
                 retirado: 0,
                 deposit: [],
@@ -343,7 +344,7 @@ async function monedasAlJuego(coins,wallet,intentos){
             if(myUser && myUser.active){
                     
                 await user.updateOne({ wallet: uc.upperCase(wallet) }, [
-                    {$set: {balance: {$sum:["$balance",coins.shiftedBy(-18).toNumber()]}}}
+                    {$set: {balanceUSD: {$sum:["$balanceUSD",coins.shiftedBy(-18).toNumber()]}}}
                 ])
                 
                 console.log("SEND IN GAME: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet)+" | "+intentos+" intentos")
@@ -410,15 +411,15 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
         result = parseInt(result);
 
-        var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balance:1,payAt:1});
+        var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{password:1,username:1,email:1,balanceUSD:1,payAt:1});
 
-        if (usuario && usuario.active && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balance > 0 && usuario.balance-coins.shiftedBy(-18).toNumber() >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
+        if (usuario && usuario.active && result > 0 && usuario.password !== "" && usuario.email !== "" && usuario.username !== "" && usuario.balanceUSD > 0 && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 && Date.now() > (usuario.payAt + (TimeToMarket * 1000)) ) {
 
-            var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{balance:1});
+            var usuario = await user.findOne({ wallet: uc.upperCase(wallet) },{balanceUSD:1});
 
             await delay(Math.floor(Math.random() * 12000));
 
-            if(usuario.balance > 0){
+            if(usuario.balanceUSD > 0){
 
                 if(await monedasAlExchange(coins, wallet,1) ){
                     res.send("true");
@@ -476,7 +477,7 @@ async function monedasAlExchange(coins,wallet,intentos){
 
     usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
-    if(usuario.balance-coins.shiftedBy(-18).toNumber() >= 0 ){
+    if(usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ){
         var envioExitoso = await contractExchange.methods
         .asignarCoinsTo(coins.toString(10), wallet)
         .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
@@ -486,7 +487,7 @@ async function monedasAlExchange(coins,wallet,intentos){
         if(envioExitoso ){
 
             await user.updateOne({ wallet: uc.upperCase(wallet) },[
-                {$set: {balance:{$subtract: ["$balance",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
+                {$set: {balanceUSD:{$subtract: ["$balanceUSD",coins.shiftedBy(-18).toNumber()]},payAt: Date.now()}}
             ])
             
             console.log("SEND TO Exchange: "+coins.shiftedBy(-18)+" # "+uc.upperCase(wallet))
@@ -690,6 +691,7 @@ app.get('/api/v1/user/ban/:wallet',async(req,res) => {
                     checkpoint: 0,
                     reclamado: false,
                     balance: 0,
+                    balanceUSD: 0,
                     ingresado: 0,
                     retirado: 0,
                     deposit: [],
@@ -798,6 +800,7 @@ app.post('/api/v1/user/update/info/:wallet',async(req,res) => {
                 checkpoint: 0,
                 reclamado: false,
                 balance: 0,
+                balanceUSD: 0,
                 ingresado: 0,
                 retirado: 0,
                 deposit: [{amount: req.body.coins,
@@ -1796,7 +1799,7 @@ app.get('/api/v1/consultar/wcsc/lista/', async(req, res, next) => {
         cantidad = 100;
     }
     
-    usuarios = await user.find({},{password: 0, _id: 0, checkpoint:0, ingresado: 0, retirado: 0, deposit: 0, retiro:0, txs:0,email:0,reclamado:0}).limit(cantidad).sort([['balance', -1]]);
+    usuarios = await user.find({},{password: 0, _id: 0, checkpoint:0, ingresado: 0, retirado: 0, deposit: 0, retiro:0, txs:0,email:0,reclamado:0}).limit(cantidad).sort([['balanceUSD', -1]]);
 
     var lista = [];
     var ex = 0;
@@ -1888,161 +1891,6 @@ app.get('/api/v1/consultar/csc/exchange/:wallet', async(req, res, next) => {
  });
 
 
-app.post('/api/v1/asignar2/:wallet',async(req,res) => {
-
-    var wallet =  req.params.wallet.toLowerCase();
-
-    req.body.coins = parseInt(req.body.coins);
-    
-    if(req.body.token == TOKEN2 && web3.utils.isAddress(wallet)){
-
-        usuario = await user.find({ wallet: uc.upperCase(wallet) });
-
-        if (usuario.length >= 1) {
-            var datos = usuario[0];
-            if(datos.active){
-                datos.balance = datos.balance + req.body.coins;
-                datos.ingresado = datos.ingresado + req.body.coins;
-                datos.deposit.push({amount: req.body.coins,
-                    date: Date.now(),
-                    finalized: true,
-                    txhash: "Ajuste: "+req.body.coins+" # "+uc.upperCase(wallet)
-                })
-
-                //datos.wcscExchange = await consultarCscExchange(wallet);
-
-                var nuevoUsuario = new user(datos)
-                await nuevoUsuario.save();
-
-                //update = await user.updateOne({ wallet: uc.upperCase(wallet) }, datos);
-                console.log("Ajuste: "+req.body.coins+" # "+uc.upperCase(wallet));
-                res.send("true");
-            }else{
-                res.send("false");
-            }
-    
-        }else{
-            console.log("creado USUARIO al Ajustar"+wallet)
-            var users = new user({
-                wallet: uc.upperCase(wallet),
-                email: "",
-                password: "",
-                username: "", 
-                active: true,
-                payAt: Date.now(),
-                checkpoint: 0,
-                reclamado: false,
-                balance: req.body.coins,
-                ingresado: req.body.coins,
-                retirado: 0,
-                deposit: [{amount: req.body.coins,
-                    date: Date.now(),
-                    finalized: true,
-                    txhash: "Win coins: "+req.body.coins+" # "+req.params.wallet
-                }],
-                retiro: [],
-                txs: [],
-                pais: "null",
-                imagen: imgDefault,
-                wcscExchange: 0
-            });
-    
-            users.save().then(()=>{
-                console.log("Usuario creado exitodamente");
-                res.send("true");
-            })
-                
-            
-        }
-
-
-    }else{
-        res.send("false");
-    }
-		
-});
-
-app.post('/api/v1/quitar2/:wallet',async(req,res) => {
-
-    var wallet =  req.params.wallet.toLowerCase();
-
-    req.body.coins = parseInt(req.body.coins);
-
-    if(req.body.token == TOKEN2  && web3.utils.isAddress(wallet)){
-
-        usuario = await user.find({ wallet: uc.upperCase(wallet) });
-
-        if (usuario.length >= 1) { 
-            var datos = usuario[0];
-            if(datos.active){
-                datos.balance = datos.balance-req.body.coins;
-                if(datos.balance >= 0){
-
-                    datos.retirado = datos.retirado+ req.body.coins;
-                    datos.retiro.push({
-                        amount: req.body.coins,
-                        date: Date.now(),
-                        done: true,
-                        dateSend: Date.now(),
-                        txhash: "-Ajuste: "+req.body.coins+" # "+uc.upperCase(wallet)
-                  
-                      })
-
-                    //datos.wcscExchange = await consultarCscExchange(wallet);
-
-                    var nuevoUsuario = new user(datos)
-                    await nuevoUsuario.save();
-
-                    //update = await user.updateOne({ wallet: uc.upperCase(wallet) }, datos);
-                    console.log("-Ajuste: "+req.body.coins+" # "+uc.upperCase(wallet));
-                    res.send("true");
-
-                }else{
-                    res.send("false");
-                }
-                
-            }else{
-                res.send("false");
-            }
-    
-        }else{
-            console.log("usuario creado al retirar monedas"+wallet)
-            var users = new user({
-                wallet: uc.upperCase(wallet),  
-                email: "",
-                password: "",
-                username: "",   
-                active: true,
-                payAt: Date.now(),
-                checkpoint: 0,
-                reclamado: false,
-                balance: 0,
-                ingresado: 0,
-                retirado: 0,
-                deposit: [],
-                retiro: [],
-                txs: [],
-                pais: "null",
-                imagen: imgDefault,
-                wcscExchange: 0
-            });
-    
-            users.save().then(()=>{
-                console.log("Usuario creado exitodamente");
-                
-            })
-            res.send("false");
-                
-            
-        }
-
-    }else{
-        res.send("false");
-    }
-		
-    
-});
-
 app.post('/api/v1/ban/unban/:wallet',async(req,res) => {
 
     var wallet =  req.params.wallet.toLowerCase();
@@ -2086,6 +1934,7 @@ app.post('/api/v1/ban/unban/:wallet',async(req,res) => {
                 checkpoint: 0,
                 reclamado: false,
                 balance: 0,
+                balanceUSD: 0,
                 ingresado: 0,
                 retirado: 0,
                 deposit: [],
