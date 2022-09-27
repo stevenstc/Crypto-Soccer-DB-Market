@@ -287,11 +287,11 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     result = parseInt(result);
 
-    if(usuario && usuario.active && result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) ){
+    if(usuario && usuario.active && req.body.coins*req.body.precio > 0 && result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) ){
 
         await delay(Math.floor(Math.random() * 12000));
 
-        coins = new BigNumber(req.body.coins).shiftedBy(18);
+        coins = new BigNumber(req.body.coins*req.body.precio).shiftedBy(18);
 
         if(await monedasAlJuego(coins,wallet,1)){
             res.send("true");
