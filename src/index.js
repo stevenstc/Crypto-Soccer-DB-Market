@@ -331,6 +331,7 @@ async function monedasAlJuego(coins,wallet,intentos){
         
     } catch (err) {
         console.log("error al estimar el gaslimit 2")
+        console.log(err)
 
     }   
 
