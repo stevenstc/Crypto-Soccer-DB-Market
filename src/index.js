@@ -287,13 +287,13 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     result = parseInt(result);
 
-    if(usuario && usuario.active && req.body.coins*req.body.precio > 0 && result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) ){
+    if(usuario && usuario.active && req.body.coins*req.body.precio > 0 && req.body.gasLimit*1 > 0 && result > 0 && req.body.token == TOKEN  && web3.utils.isAddress(wallet) ){
 
         await delay(Math.floor(Math.random() * 12000));
 
         coins = new BigNumber(req.body.coins*req.body.precio).shiftedBy(18);
 
-        if(await monedasAlJuego(coins,wallet,1)){
+        if(await monedasAlJuego(req.body.gasLimit*1,coins,wallet,1)){
             res.send("true");
 
         }else{
@@ -308,13 +308,12 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
     
 });
 
-async function monedasAlJuego(coins,wallet,intentos){
+async function monedasAlJuego(gasLimit,coins,wallet,intentos){
 
     await delay(Math.floor(Math.random() * 12000));
 
     var paso = false;
     var gases = 0; 
-    var gasLimit = 0;
 
     usuario = await contractExchange.methods.investors(wallet).call({ from: web3.eth.accounts.wallet[0].address});
     usuario.balance = new BigNumber(usuario.balance).shiftedBy(-18).toNumber();
@@ -323,15 +322,14 @@ async function monedasAlJuego(coins,wallet,intentos){
         gases = await web3.eth.getGasPrice(); 
  
     } catch (err) {
-        console.log("error al estimar el gas 1")
+        console.log("error al estimar el gasprice")
     }   
 
     try {
-        gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: web3.eth.accounts.wallet[0].address});
+        gasLimit = await contractExchange.methods.gastarCoinsfrom(coins, wallet).estimateGas({from: "0x00326ad2E5ADb9b95035737fD4c56aE452C2c965"});
         
     } catch (err) {
         console.log("error al estimar el gaslimit 2")
-        console.log(err)
 
     }   
 
