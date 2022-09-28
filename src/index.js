@@ -483,7 +483,7 @@ async function monedasAlExchange(coins,wallet,intentos,precio){
 
     if(usuario && usuario.active && usuario.balanceUSD-coins.shiftedBy(-18).toNumber() >= 0 ){
         var envioExchange = coins.shiftedBy(-18).dividedBy(precio).shiftedBy(18)
-        var envioExitoso = await contractExchange.methods.asignarCoinsTo(envioExchange.toString(10), wallet)
+        var envioExitoso = await contractExchange.methods.asignarCoinsTo(envioExchange.decimalPlaces(0).toString(10), wallet)
         .send({ from: web3.eth.accounts.wallet[0].address, gas: gasLimit, gasPrice: gases })
         .then(() => {return true;})
         .catch(() => {return false;})
