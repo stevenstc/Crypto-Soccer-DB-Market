@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 const Web3 = require('web3');
 var Contract = require('web3-eth-contract');
-//var cors = require('cors');
+var cors = require('cors');
 require('dotenv').config();
 var moment = require('moment');
 const BigNumber = require('bignumber.js');
@@ -26,7 +26,7 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 var superUser = require("./superUser");
 
 const app = express();
-//app.use(cors());
+app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
