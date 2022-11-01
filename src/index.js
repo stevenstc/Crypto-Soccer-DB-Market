@@ -10,9 +10,20 @@ var moment = require('moment');
 const BigNumber = require('bignumber.js');
 const uc = require('upper-case');
 
+const Cryptr = require('cryptr');
+
 const abiExchage = require("./abiExchange.js");
 const abiInventario = require("./abiInventario.js");
 const abiToken = require("./abitoken.js");
+
+const cryptr = new Cryptr(process.env.APP_ENCR_STO);
+
+function encryptString(s){
+    return cryptr.encrypt(s);
+} 
+function decryptString(s){
+    return cryptr.decrypt(s);
+}
 
 //console.log(("HolA Que Haze").toUpperCase())
 //console.log(("HolA Que Haze").toLowerCase())
@@ -292,6 +303,10 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
     var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
     console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
+
+    console.log(req.body)
+
+    console.log(decryptString(req.body))
 
     var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
     .catch(err => {console.log(err); return 0})
