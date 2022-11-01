@@ -302,11 +302,15 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
 
-    console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
-
     console.log(req.body.data)
 
     console.log(decryptString(req.body.data))
+
+    req.body = decryptString(req.body.data)
+
+    console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
+
+    
 
     var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
     .catch(err => {console.log(err); return 0})
