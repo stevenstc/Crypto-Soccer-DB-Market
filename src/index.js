@@ -19,10 +19,22 @@ const abiToken = require("./abitoken.js");
 const cryptr = new Cryptr(process.env.APP_ENCR_STO);
 
 function encryptString(s){
-    return cryptr.encrypt(s);
+
+    return cryptr.encrypt(s)
+    .then((result)=>{
+        return result;
+    })
+    .catch((error)=>{
+        return {};
+    })
 } 
 function decryptString(s){
-    return cryptr.decrypt(s);
+    return cryptr.decrypt(s).then((result)=>{
+        return result;
+    })
+    .catch((error)=>{
+        return {};
+    })
 }
 
 //console.log(("HolA Que Haze").toUpperCase())
@@ -428,14 +440,15 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
     var wallet =  req.params.wallet.toLowerCase();
 
-    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
+    req.body = JSON.parse(decryptString(req.body.data))
+
+    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= 5*1000){
 
         console.log("To Exchange: "+req.body.coins+" | "+uc.upperCase(wallet))
 
         var coins = new BigNumber(req.body.coins).shiftedBy(18);
         var precio = new BigNumber(req.body.precio).toNumber();
         
-
         var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
         .catch(err => {console.log(err); return 0})
 
