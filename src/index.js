@@ -20,21 +20,21 @@ const cryptr = new Cryptr(process.env.APP_ENCR_STO);
 
 function encryptString(s){
 
-    return cryptr.encrypt(s)
-    .then((result)=>{
-        return result;
-    })
-    .catch((error)=>{
+    if (typeof s === 'string'){
+        return cryptr.encrypt(s)
+    }else{
         return {};
-    })
+    }
+
+    
 } 
 function decryptString(s){
-    return cryptr.decrypt(s).then((result)=>{
-        return result;
-    })
-    .catch((error)=>{
+    if (typeof s === 'string'){
+        return cryptr.decrypt(s)
+    }else{
         return {};
-    })
+    }
+    
 }
 
 //console.log(("HolA Que Haze").toUpperCase())
@@ -313,6 +313,11 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
     var wallet =  req.params.wallet.toLowerCase();
 
     var usuario = await user.findOne({ wallet: uc.upperCase(wallet) });
+
+    if(!req.body.data){
+        res.send("false");
+        return;
+    }
 
     req.body = JSON.parse(decryptString(req.body.data))
 
