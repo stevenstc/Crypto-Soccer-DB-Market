@@ -306,7 +306,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     console.log(decryptString(req.body.data))
 
-    req.body = decryptString(req.body.data)
+    req.body = JSON.parse(decryptString(req.body.data))
 
     console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
 
