@@ -311,11 +311,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     result = parseInt(result);
 
-    console.log(req.headers.authorization.split(' ')[1] == TOKEN)
-    console.log(req.headers.authorization.split(' ')[1])
-
-
-    if(usuario && usuario.active && req.body.precio*1 > 0 && result > 0 &&  req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) ){
+    if(usuario && usuario.active && req.body.precio*1 > 0 && result > 0 &&  req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= 5*1000 ){
 
         await delay(Math.floor(Math.random() * 12000));
 
