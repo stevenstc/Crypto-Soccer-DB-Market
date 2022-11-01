@@ -304,9 +304,9 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
 
-    console.log(req.body)
+    console.log(req.body.data)
 
-    console.log(decryptString(req.body))
+    console.log(decryptString(req.body.data))
 
     var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
     .catch(err => {console.log(err); return 0})
