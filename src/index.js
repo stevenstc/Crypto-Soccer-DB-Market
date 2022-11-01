@@ -298,7 +298,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     result = parseInt(result);
 
-    if(usuario && usuario.active && req.body.precio*1 > 0 && result > 0 && req.headers && req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) ){
+    if(usuario && usuario.active && req.body.precio*1 > 0 && result > 0 &&  req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) ){
 
         await delay(Math.floor(Math.random() * 12000));
 
@@ -415,7 +415,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
     var wallet =  req.params.wallet.toLowerCase();
 
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
+    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
 
         console.log("To Exchange: "+req.body.coins+" | "+uc.upperCase(wallet))
 
@@ -727,7 +727,7 @@ app.post('/api/v1/user/update/info/:wallet',async(req,res) => {
 
     var wallet =  req.params.wallet.toLowerCase();
     
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
+    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
 
         usuario = await user.find({ wallet: uc.upperCase(wallet) });
 
@@ -842,7 +842,7 @@ app.post('/api/v1/user/auth/:wallet',async(req,res) => {
 
     var wallet =  req.params.wallet.toLowerCase();
 
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
+    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
 
         usuario = await user.find({ wallet: uc.upperCase(wallet) });
 
@@ -1122,7 +1122,7 @@ app.get('/api/v1/consulta/playerdata/:wallet',async(req,res) => {
 
 app.post('/api/v1/reset/leadboard',async(req,res) => {
 
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN ){
+    if( req.headers.authorization.split(' ')[1] == TOKEN ){
 
         //var dataUsuarios = await playerData.find({}).sort([['CupsWin', 1]]);
 
@@ -1139,7 +1139,7 @@ app.post('/api/v1/update/playerdata/:wallet',async(req,res) => {
 
     var wallet =  req.params.wallet;
     
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN ){
+    if( req.headers.authorization.split(' ')[1] == TOKEN ){
 
         var usuario = await playerData.find({wallet: uc.upperCase(wallet)});
         
@@ -1904,7 +1904,7 @@ app.post('/api/v1/ban/unban/:wallet',async(req,res) => {
     req.body.active
     req.body.ban 
 
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN2  && web3.utils.isAddress(wallet)){
+    if( req.headers.authorization.split(' ')[1] == TOKEN2  && web3.utils.isAddress(wallet)){
 
         usuario = await user.find({ wallet: uc.upperCase(wallet) });
 
@@ -1976,7 +1976,7 @@ app.post('/api/v1/copas/asignar/:wallet',async(req,res) => {
 
     console.log("Copas: +"+copas+" wallet:"+wallet)
     
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
+    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
 
         playerdatas.updateOne({ wallet: uc.upperCase(wallet) },[
             {$set:{CupsWin: {$sum:["$CupsWin",copas]}}}
@@ -2002,7 +2002,7 @@ app.post('/api/v1/copas/quitar/:wallet',async(req,res) => {
 
     console.log("Copas: -"+copas+" wallet:"+wallet)
     
-    if(req.headers && req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
+    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet)){
 
         playerdatas.updateOne({ wallet: uc.upperCase(wallet) },[
             {$set:{CupsWin: {$subtract:["$CupsWin",copas]}}}
