@@ -321,7 +321,15 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     req.body = JSON.parse(decryptString(req.body.data))
 
-    console.log(req.headers.authorization)
+    console.log(req.headers.authorization.split(' ')[1])
+    console.log(TOKEN)
+    console.log(req.headers.authorization.split(' ')[1] == TOKEN)
+
+    console.log(Date.now() )
+    console.log(parseInt(req.body.time))
+    console.log(Date.now()-parseInt(req.body.time) <= 5*1000)
+
+    console.log(web3.utils.isAddress(wallet))
 
     if(req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= 5*1000 ){
 
