@@ -323,28 +323,33 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     console.log(req.headers.authorization)
 
-    console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
+    if(req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= 5*1000 ){
 
-    var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
-    .catch(err => {console.log(err); return 0})
+        console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
 
-    result = parseInt(result);
+        var result = await contractInventario.methods.largoInventario(wallet).call({ from: web3.eth.accounts.wallet[0].address })
+        .catch(err => {console.log(err); return 0})
 
-    if(usuario && usuario.active && req.body.precio*1 > 0 && result > 0 &&  req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= 5*1000 ){
+        result = parseInt(result);
 
-        await delay(Math.floor(Math.random() * 12000));
+        if(usuario && usuario.active && req.body.precio*1 > 0 && result > 0 ){
 
-        coins = new BigNumber(req.body.coins).shiftedBy(18);
-        precio = 1*req.body.precio;
+            await delay(Math.floor(Math.random() * 12000));
 
-        if(await monedasAlJuego(coins,wallet,1,precio)){
-            res.send("true");
+            coins = new BigNumber(req.body.coins).shiftedBy(18);
+            precio = 1*req.body.precio;
+
+            if(await monedasAlJuego(coins,wallet,1,precio)){
+                res.send("true");
+
+            }else{
+                res.send("false");
+
+            }
 
         }else{
             res.send("false");
-
         }
-
     }else{
         res.send("false");
     }
