@@ -28,6 +28,7 @@ function encryptString(s){
 
     
 } 
+
 function decryptString(s){
     if (typeof s === 'string'){
         return cryptr.decrypt(s)
@@ -63,6 +64,8 @@ const TOKEN2 = process.env.APP_TOKEN2;
 const TokenEmail = "nuevo123";
 
 const uri = process.env.APP_URI;
+
+const transancTime = 40;
 
 const TimeToMarket = process.env.APP_TIMEMARKET || 86400 * 7;
 
@@ -321,11 +324,7 @@ app.post('/api/v1/coinsaljuego/:wallet',async(req,res) => {
 
     req.body = JSON.parse(decryptString(req.body.data))
 
-    console.log(Date.now() )
-    console.log(parseInt(req.body.time))
-    console.log(Date.now()-parseInt(req.body.time) <= 10*1000)
-
-    if(req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= 10*1000 ){
+    if(req.headers.authorization.split(' ')[1] == TOKEN  && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= transancTime*1000 ){
 
         console.log("To Game: "+req.body.coins+" | "+uc.upperCase(wallet))
 
@@ -456,7 +455,7 @@ app.post('/api/v1/coinsalmarket/:wallet',async(req,res) => {
 
     req.body = JSON.parse(decryptString(req.body.data))
 
-    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= 10*1000){
+    if( req.headers.authorization.split(' ')[1] == TOKEN && web3.utils.isAddress(wallet) && Date.now()-parseInt(req.body.time) <= transancTime*1000){
 
         console.log("To Exchange: "+req.body.coins+" | "+uc.upperCase(wallet))
 
