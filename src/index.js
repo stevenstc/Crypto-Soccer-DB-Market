@@ -16,7 +16,13 @@ const abiExchage = require("./abiExchange.js");
 const abiInventario = require("./abiInventario.js");
 const abiToken = require("./abitoken.js");
 
-const cryptr = new Cryptr(process.env.APP_ENCR_STO);
+const cryptr = new Cryptr(process.env.APP_ENCR_STO); 
+
+const app = express();
+
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 function encryptString(s){
 
@@ -49,15 +55,8 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 var superUser = require("./superUser");
 
-const app = express();
-app.use(cors({
-    origin: 'https://diamondsoccer.tk/'
-}));
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(bodyParser.raw());
-app.use(bodyParser.text());
+
 
 const port = process.env.PORT || 3006;
 const PEKEY = process.env.APP_PRIVATEKEY;
@@ -118,13 +117,8 @@ const playerData = require("./modelos/playerdatas");
 const userplayonline = require("./modelos/userplayonline");
 const playerdatas = require('./modelos/playerdatas');
 
-
-
-
-
 async function precioCSC(){
     
-
     var result1 = await contractToken.methods
         .balanceOf("0x7Ca78Da43388374E0BA3C46510eAd7473a1101d4")
         .call({ from: web3.eth.accounts.wallet[0].address })
