@@ -50,7 +50,9 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 var superUser = require("./superUser");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: 'https://diamondsoccer.tk/'
+}));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
